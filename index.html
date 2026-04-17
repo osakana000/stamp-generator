@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--canvas-->
+        <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/gifshot@0.3.2/build/gifshot.min.js"></script>
+
+        <!--DOMをSVGに変換するライブラリ-->
+        <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+        <link rel="stylesheet" href="style.css">
+        <title>スタンプジェネレーター</title>
+    </head>
+    <body>
+        <h3>スタンプジェネレーター</h3>
+        <button id="edit" class="mode-btn"><i class="ri-pencil-line"></i>編集</button>
+        <button id="view" class="mode-btn"><i class="ri-eye-line"></i>閲覧</button>
+        <div id="yoko">
+            <div id="canvasWrapper">
+                <div id="mainCanvasArea">
+                    <div id="main">
+                        <span class="text" data-text=""></span>
+                         <div class="outWarning" id="outWarning">
+                            <span class="mark">!</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="canvasLock" hidden>
+                    <div class="GIFtext"><i class="ri-lock-2-fill"></i>GIF生成中…</div>
+                </div>
+            </div>
+            <div id="tab">
+                <div class="window" id="settei">
+                    <div class="tab">
+                        <label>
+                            <input  class="none" type="radio" name="tab" checked>
+                            文字
+                        </label>
+                        <div>
+                            <label>文字変更
+                                <br>
+                                <textarea id="mojihenkou" placeholder="ここに変更したい文字を入力"></textarea>
+                                <button id="henkoukakutei">表示</button>
+                            </label>
+                            <br>
+                            <label>色
+                                <input type="color" id="fontcolor" value="#000000">
+                            </label>
+                            <br>
+                            <label>大きさ
+                                <div class="tooltip">
+                                    <input type="range" id="fontsize" min="1" max="300" value="50">
+                                    <span id="getsize"></span>
+                                    <input type="number" id="changesize" min="1" max="300" value="50">
+                                </div>
+                            </label>
+                            <br>
+                            <label>間隔
+                                <div class="tooltip">
+                                    <input type="range" id="spacing" min="-50" value="1">
+                                    <span id="getspacing">1</span>
+                                    <input type="number" id="changespacing" min="-50" value="1">
+                                </div>
+                            </label>
+                            <br>
+                            <button class="textbtn" id="textbold"><i class="ri-bold"></i></button>
+                            <button class="textbtn" id="textitalic"><i class="ri-italic"></i></button>
+                            <button class="textbtn" id="textunderline"><i class="ri-underline"></i></button>
+                            <br>
+                            <details class="accordion">
+                                <summary>縁取り</summary>
+                                <label>
+                                    <input type="checkbox" id="hutidorihyouji">
+                                    縁取りを表示
+                                </label>
+                                <br>
+                                <label>縁取りの大きさ
+                                    <div class="tooltip">
+                                        <input type="range" id="huti" min="1" max="10" value="0">
+                                        <span id="gethutisize">0px</span>
+                                        <input type="number" id="changehuti" min="1" max="10" value="0">
+                                    </div>
+                                </label>
+                                <br>
+                                <label>縁取りの色
+                                    <input type="color" id="huticolor" value="#000000">
+                                </label>
+                            </details>
+                            <br>
+                            <details class="accordion">
+                                <summary>影</summary>
+                                <label>
+                                    <input type="checkbox" id="kagehyouji">
+                                    影を表示
+                                </label>
+                                <br>
+                                <label>影(x)
+                                    <div class="tooltip">
+                                        <input type="range" id="shadowX" min="-40" max="40" value="0">
+                                        <span id="getkagex">0px</span>
+                                        <input type="number" id="changekagex" min="-40" max="40" value="0">
+                                    </div>
+                                </label>
+                                <br>
+                                <label>影(y)
+                                    <div class="tooltip">
+                                        <input type="range" id="shadowY" min="-40" max="40" value="0">
+                                        <span id="getkagey">0px</span>
+                                        <input type="number" id="changekagey" min="-40" max="40" value="0">
+                                    </div>
+                                </label>
+                                <br>
+                                <label>影のぼかし
+                                    <div class="tooltip">
+                                        <input type="range" id="shadowBlur" min="0" max="50" value="0">
+                                        <span id="getkageblur">0px</span>
+                                        <input type="number" id="changekageblur" min="0" max="50" value="0">
+                                    </div>
+                                </label>
+                                <br>
+                                <label>影の色
+                                    <input type="color" id="shadowColor" value="#000000">
+                                </label>
+                            </details>
+                            <!-- <br>
+                            <details class="accordion">
+                                <summary>グラデーション</summary>
+                                <label>
+                                    <input type="checkbox" id="guradehyouji">
+                                    グラデーションを表示
+                                </label>
+                                <br>
+                                <label>グラデーションの方向
+                                    <br>
+                                    <input type="radio" id="line" name="direction" checked>
+                                    直線
+                                </label>
+                                <label>
+                                    <input type="radio" id="circle" name="direction">
+                                    円
+                                </label>
+                                <br>
+                                <label>グラデーションの角度
+                                    <div class="tooltip">
+                                        <input type="range" id="gradation" min="-180" max="180" value="0">
+                                        <span id="getgkakudo">0°</span>
+                                        <input type="number" id="changegradation" min="-180" max="180" value="0">
+                                    </div>
+                                </label>
+                                <br>
+                                <label>グラデーションの色
+                                    <input type="color" id="gradationcolor" value="#000000">
+                                </label>
+                            </details> -->
+                        </div>
+
+                        <label>
+                            <input class="none" type="radio" name="tab">
+                            画像・移動
+                        </label>
+                        <div>
+                            <label>大きさ
+                                <div class="tooltip">
+                                    <input type="range" id="gazousize" min="0.1" max="3" step="0.1" value="1">
+                                    <span id="scalesize">100%</span>
+                                    <input type="number" id="changescale" min="0.1" max="3" step="0.1" value="1">
+                                </div>
+                            </label>
+                            <br>
+                            <label>文字・画像の移動(x)
+                                <div class="tooltip">
+                                    <input type="range" id="x" min="-500" max="250" value="0">
+                                    <span id="xspan">0px</span>
+                                    <input type="number" id="changex" min="-500" max="250" value="0">
+                                </div>
+                            </label>
+                            <br>
+                            <label>文字・画像の移動(y)
+                                <div class="tooltip">
+                                    <input type="range" id="y" min="-500" max="250" value="0">
+                                    <span id="yspan">0px</span>
+                                    <input type="number" id="changey" min="-500" max="250" value="0">
+                                </div>
+                            </label>
+                            <br>
+                            <label>
+                                <input type="checkbox" id="snap" checked>
+                                移動スナップ
+                            </label>
+                        </div>
+
+                        <label>
+                            <input class="none" type="radio" name="tab">
+                            アニメーション
+                        </label>
+                        <div>
+                            <label class="selectbox">種類
+                                <select id="animType">
+                                    <option value="none">なし</option>
+                                    <option value="fadeIn">フェードイン</option>
+                                    <option value="scaleIn">拡大</option>
+                                    <option value="shake">揺れ</option>
+                                    <option value="jump">飛び跳ね</option>
+                                </select>
+                            </label>
+                            <br>
+                            <label>時間
+                                <div class="tooltip">
+                                    <input type="range" id="animDuration" min="0.1" max="5" step="0.1" value="1">
+                                    <span id="getduration">1秒</span>
+                                    <input type="number" id="changeduration" min="0.1" max="5" step="0.1" value="1">
+                                </div>
+                            </label>
+                            <br>
+                            <label>遅延
+                                <div class="tooltip">
+                                    <input type="range" id="animDelay" min="0" max="5" step="0.1" value="0">
+                                    <span id="getdelay">0秒</span>
+                                    <input type="number" id="changedelay" min="0" max="5" step="0.1" value="0">
+                                </div>
+                            </label>
+                            <br>
+                            <label>
+                                <input type="checkbox" id="animLoop">
+                                ループ再生
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="window" id="two">
+                    <label>角度
+                        <div class="tooltip">
+                            <input type="range" id="kakudo" min="-180" max="180" value="0">
+                            <span id="getkakudo">0°</span>
+                            <input type="number" id="changekakudo" min="-180" max="180" value="0">
+                        </div>
+                    </label>
+                    <br>
+                    <label>重なり
+                        <div class="tooltip">
+                            <input type="range" id="kasanari" min="1" max="20" value="1">
+                            <span id="kasanaridata">1</span>
+                            <input type="number" id="changekasanari" min="1" max="20" value="1">
+                        </div>
+                    </label>
+                    <br>
+                    <button id="delete"><i class="ri-delete-bin-line"></i>選択した要素を削除</button>
+                </div>
+            </div>
+        </div>
+
+        
+        <div>
+            <label>大きさ
+                <label class="selectbox">
+                    <select id="size">
+                        <option value="256">256x256</option>
+                        <option value="512" selected>512x512</option>
+                        <option value="1024">1024x1024</option>
+                    </select>
+                </label>
+                <br>
+                <label>幅
+                    <input type="number" id="canvasWidth" value="512"> px
+                </label>
+                <label>高さ
+                    <input type="number" id="canvasHeight" value="512"> px
+                </label>
+                <button id="applysize">反映</button>
+            </label>
+        </div>
+        <hr>
+        <div>
+            <label id="gazou">画像を選択
+                <input type="file" id="imgfile" accept="image/*"><button id="addImage">追加</button>
+            </label>
+        </div>
+        <div>
+            <label>文字
+                <br>
+                <textarea id="moji" placeholder="ここに追加したい文字を入力"></textarea>
+                <button id="kakutei">追加</button>
+            </label>
+            <label>
+                <input type="checkbox" id="verticalToggle">
+                縦書き
+            </label>
+            <label class="selectbox">フォント
+                <select id="fontfamily">
+                    <option value="ZenMaru" selected>ZEN丸ゴシック</option>
+                    <option value="ZenKaku">ZEN角ゴシック New</option>
+                    <option value="ZenOld">ZENオールド明朝</option>
+                    <option value="kfont">けいふぉんと！</option>
+                    <option value="hakidame">吐き溜</option>
+                    <option value="CHIKARA-DZUYOKU">851チカラヅヨク</option>
+                    <option value="CHIKARA-YOWAKU">851チカラヨワク</option>
+                    <option value="mushin">無心</option>
+                    <option value="fuwafude">ふわふで</option>
+                    <option value="Ounen">桜鯰</option>
+                </select>
+            </label>
+            <label class="selectbox">太さ
+                <select id="fontweight">
+                    <option value="400">Regular</option>
+                    <option value="500" selected>Medium</option>
+                    <option value="900">Bold</option>
+                </select>
+            </label>
+        </div>
+        <hr>
+        <div>
+            <button id="download"><i class="ri-download-2-line"></i>PNGでダウンロード</button>
+            <label>
+                <input type="checkbox" id="scalehigh">
+                高解像度(２倍の大きさ)
+            </label>
+            <label>
+                <input type="checkbox" id="transparentBg">
+                背景を透過
+            </label>
+            <label>背景の色
+                <input type="color" id="background" value="#ffffff">
+            </label>
+            <br>
+            <button id="gif"><i class="ri-download-2-line"></i>GIFでダウンロード</button>
+            <p>※GIFのときは背景は透過されません</p>
+        </div>
+        <hr>
+        <p>クリックで文字・画像を選択して設定を変更できます</p>
+        <p>ドラッグで移動できます</p>
+    </body>
+</html>
+<script>
+    const edit = document.getElementById("edit");
+    const view = document.getElementById("view");
+
+    let editMode = true;
+
+    edit.addEventListener('click', () => {
+        editMode = true;
+
+        tab.style.display = 'block';
+
+        const warnings = document.querySelectorAll(".outWarning");
+        warnings.forEach(el => el.style.display = "");
+        main.classList.remove("exporting");
+
+        edit.classList.add("active");
+        view.classList.remove("active");
+    });
+
+    view.addEventListener('click', () => {
+        editMode = false;
+
+        tab.style.display = 'none';
+        //警告UIを消す
+        const warnings = document.querySelectorAll(".outWarning");
+        warnings.forEach(el => el.style.display = "none");
+        main.classList.add("exporting");//選択枠を消す
+
+        view.classList.add("active");
+        edit.classList.remove("active");
+    });
+
+    const bold = document.getElementById("textbold");
+    const italic = document.getElementById("textitalic");
+    const underline = document.getElementById("textunderline");
+
+    bold.addEventListener("click", () => {
+        if (!selectedElement) return;
+
+        selectedElement._settings.fontWeight =
+            selectedElement._settings.fontWeight === "700"
+            ? "500"
+            : "700";
+
+        applyTextSettings(selectedElement);
+
+        bold.classList.toggle("active");
+    });
+
+    italic.addEventListener("click", () => {
+        if (!selectedElement) return;
+
+        selectedElement._settings.italic =
+            !selectedElement._settings.italic;
+
+        applyTextSettings(selectedElement);
+
+        italic.classList.toggle("active");
+    });
+
+    underline.addEventListener("click", () => {
+        if (!selectedElement) return;
+
+        selectedElement._settings.underline =
+            !selectedElement._settings.underline;
+
+        applyTextSettings(selectedElement);
+
+        underline.classList.toggle("active");
+    });
+
+    
+    const main = document.getElementById("main");
+    const text = document.getElementById('text');
+    const moji = document.getElementById('moji');
+    const kakutei = document.getElementById('kakutei');
+
+    //設定を記録
+    //テキスト
+    const defaultTextSettings = {
+        fontFamily: "ZenMaru",
+        fontWeight: "500",
+        fontSize: 50,
+        color: "#000000",
+        letterSpacing: 1,
+        underline: false,
+        italic: false,
+        strokeWidth: 0,
+        strokeColor: "#000000",
+        strokeEnabled: false,
+        textShadowEnabled: false,
+        textShadow: {//影の設定
+            offsetX: 0,//横
+            offsetY: 0,//縦
+            blur: 0,//ぼかし
+            color: "#000000"
+        },
+        // gradient: {
+        //     enabled: false,
+        //     type: "linear",   //linear | radial
+        //     angle: 0,
+        //     color: "#000000"
+        // },
+        writingMode: "horizontal", //or "vertical"
+        rotation: 0,
+        zIndex: 1,
+        paintorder: "stroke fill"
+    };
+    //画像
+    const defaultImageSettings = {
+        scale: 1,
+        x: 0,
+        y: 0,
+        rotation: 0,
+        zIndex: 1
+    };
+    const defaultAnimationSettings = {
+        type: "none",   //none | fadeIn | scaleIn | shake | jump |
+        duration: 1,    //秒
+        delay: 0,       //秒
+        loop: false
+    };
+
+
+    //見た目の設定
+    function applyTextSettings(el) {
+        if (!el || !el.classList.contains("text")) return;
+        if (!el || !el._settings) return;
+        const s = el._settings;
+
+        const shadowLayer = el._shadowLayer;
+        const fillLayer   = el._fillLayer;
+        const strokeLayer   = el._strokeLayer;
+
+        el.style.color = s.color;
+
+        el.style.zIndex = s.zIndex;
+
+        //設定を同じにする
+        [shadowLayer, fillLayer, strokeLayer].forEach(layer => {
+            layer.style.fontFamily = s.fontFamily;
+            layer.style.fontWeight = s.fontWeight;
+            layer.style.fontSize = s.fontSize + "px";
+            layer.style.letterSpacing = s.letterSpacing + "px";
+            layer.style.whiteSpace = "pre-wrap";
+        });
+
+        [shadowLayer].forEach(layer => {
+            shadowLayer.style.position = "absolute";
+            layer.style.zIndex = 1;
+        });
+
+        [fillLayer].forEach(layer => {
+            fillLayer.style.position = "relative";
+            layer.style.zIndex = 3;
+        });
+
+        [strokeLayer].forEach(layer => {
+            strokeLayer.style.position = "absolute";
+            layer.style.color = "transparent";
+            layer.style.textShadow = "none";
+            layer.style.zIndex = 2;
+        });
+
+        fillLayer.style.fontStyle = s.italic ? "italic" : "normal";
+        strokeLayer.style.fontStyle = s.italic ? "italic" : "normal";
+        shadowLayer.style.fontStyle = s.italic ? "italic" : "normal";
+
+        fillLayer.style.textDecoration =
+        strokeLayer.style.textDecoration =
+        shadowLayer.style.textDecoration =
+            s.underline ? "underline" : "none";
+
+        //縁取りレイヤー
+        if (s.strokeEnabled) {
+            strokeLayer.style.webkitTextStrokeWidth = s.strokeWidth + "px";
+            strokeLayer.style.webkitTextStrokeColor = s.strokeColor;
+        } else {
+            strokeLayer.style.webkitTextStrokeWidth = "0px";
+        }
+
+        //影レイヤー
+        if (s.textShadowEnabled) {
+
+            const shadowParts = [];
+
+            const offsetX = s.textShadow.offsetX;
+            const offsetY = s.textShadow.offsetY;
+            const blur = s.textShadow.blur;
+            const color = s.textShadow.color;
+
+            //基本の影
+            shadowParts.push(
+                `${offsetX}px ${offsetY}px ${blur}px ${color}`
+            );
+
+            //縁取り分の厚み
+            if (s.strokeEnabled && s.strokeWidth > 0) {
+
+                const maxRadius = s.strokeWidth * 0.45; // ← 内側だけに制限
+
+                for (let r = 1; r <= maxRadius; r++) {
+
+                    const step = Math.max(10, Math.round(360 / (r * 8)));
+
+                    for (let i = 0; i < 360; i += step) {
+
+                        const rad = i * Math.PI / 180;
+
+                        const x = Math.cos(rad) * r + offsetX;
+                        const y = Math.sin(rad) * r + offsetY;
+
+                        shadowParts.push(
+                            `${x}px ${y}px ${blur}px ${color}`
+                        );
+                    }
+                }
+            }
+
+            shadowLayer.style.textShadow = shadowParts.join(",");
+
+        } else {
+
+            shadowLayer.style.textShadow = "none";
+
+        }
+
+        //グラデーションレイヤー
+        // if (s.gradient?.enabled) {
+
+        //     let gradient;
+
+        //     if (s.gradient.type === "linear") {
+        //         gradient =
+        //             `linear-gradient(${s.gradient.angle}deg, ` +
+        //             `${s.color}, ${s.gradient.color})`;
+        //     } else {
+        //         gradient =
+        //             `radial-gradient(circle, ` +
+        //             `${s.color}, ${s.gradient.color})`;
+        //     }
+
+        //     fillLayer.style.background = gradient;
+        //     fillLayer.style.webkitBackgroundClip = "text";
+        //     fillLayer.style.backgroundClip = "text";
+        //     fillLayer.style.webkitTextFillColor = "transparent";
+        //     fillLayer.style.color = "transparent";
+        //     fillLayer.style.isolation = "isolate";
+        //     fillLayer.style.display = "inline-block";
+        //     fillLayer.style.isolation = "isolate";
+        //     fillLayer.style.transform = "translateZ(0)";
+
+        // } else {
+
+        //     fillLayer.style.background = "none";
+        //     fillLayer.style.color = s.color;
+        // }
+
+        //縦書き
+        if (s.writingMode === "vertical") {
+            el.classList.add("vertical");
+        } else {
+            el.classList.remove("vertical");
+        }
+
+        applyAnimation(el);//アニメーション
+        applyTransform(el);
+    }
+
+    function applyImageSettings(el) {
+        const s = el._settings;
+
+        if (s.left) el.style.left = s.left;
+        if (s.top)  el.style.top  = s.top;
+
+        el.style.zIndex = s.zIndex ?? 1;
+
+        applyAnimation(el);
+
+        applyTransform(el);
+    }
+
+    function applyTransform(el) {
+        const s = el._settings;
+
+        el.style.setProperty("--scale", s.scale ?? 1);
+        el.style.setProperty("--rotate", `${s.rotation}deg`);
+
+        el.style.transform =
+            `scale(var(--scale)) rotate(var(--rotate))`;
+    }
+
+    function applyAnimation(el) {
+        const a = el._settings.animation;
+
+        //一旦リセット
+        el.style.animation = "none";
+
+        if (a.type === "none") return;
+
+        let name = "";
+        if (a.type === "fadeIn")  name = "fadeIn";
+        if (a.type === "scaleIn") name = "scaleIn";
+        if (a.type === "shake") name = "shake";
+        if (a.type === "jump")  name = "jump";
+
+        el.style.animationFillMode = "both";
+
+        el.style.animation =
+            `${name} ${a.duration}s ease ${a.delay}s ` +
+            (a.loop ? "infinite" : "1");
+
+        getduration.innerText = a.duration + "秒";
+        getdelay.innerText = a.delay + "秒";
+
+        //回転値をCSS変数に渡す
+        el.style.setProperty(
+            "--rotate",
+            `${el._settings.rotation}deg`
+        );
+    }
+
+
+    //記録した設定をスライダーに反映させる
+    function syncUIFromSettings(el) {
+        if (!el || !el._settings) return;
+
+        const s = el._settings;
+
+        //文字
+        if (el.classList.contains("text")) {
+            fontfamily.value = s.fontFamily;
+            fontweight.value = s.fontWeight;
+
+            fontsize.value = s.fontSize;
+            getsize.innerText = s.fontSize + "px";
+            changesize.value = s.fontSize;
+
+            fontcolor.value = s.color;
+
+            huti.value = s.strokeWidth;
+            huticolor.value = s.strokeColor;
+            changehuti.value = s.strokeWidth;
+
+            // gradation.value = s.gradient?.angle;
+            // getgkakudo.value = s.gradient?.angle;
+            // changegradation.value = s.gradient?.angle;
+
+            // gradationcolor.value = s.gradient?.color;
+
+            // if (guradehyouji) {
+            //     guradehyouji.checked = s.gradient?.enabled ?? false;
+            // }
+
+            if (hutidorihyouji) {
+                hutidorihyouji.checked = s.strokeEnabled ?? false;
+            }
+
+            if (kagehyouji) {
+                kagehyouji.checked = s.textShadowEnabled ?? false;
+            }
+
+            spacing.value = s.letterSpacing;
+            getspacing.innerText = s.letterSpacing + "px";
+            changespacing.value = s.letterSpacing;
+
+            kasanari.value = s.zIndex;
+            kasanaridata.innerText = s.zIndex;
+            changekasanari.value = s.zIndex;
+
+            verticalToggle.checked = (s.writingMode === "vertical");
+
+            shadowX.value = s.textShadow?.offsetX ?? 0;
+            shadowY.value = s.textShadow?.offsetY ?? 0;
+            shadowBlur.value = s.textShadow.blur ?? 0;
+            shadowColor.value = s.textShadow.color ?? "#000000";
+
+            changekagex.value = s.textShadow?.offsetX ?? 0;
+            changekagey.value = s.textShadow?.offsetY ?? 0;
+            changekageblur.value = s.textShadow?.blur ?? 0;
+
+            getkagex.innerText = shadowX.value + "px";
+            getkagey.innerText = shadowY.value + "px";
+            getkageblur.innerText = shadowBlur.value + "px";
+
+            // if (el.classList.contains("text")) {
+            //     const g = s.gradient;
+
+            //     if (g?.enabled) {
+            //         gradation.value = g.angle;
+            //         getgkakudo.innerText = g.angle + "°";
+            //         gradationcolor.value = g.color;
+            //         line.checked = g.type === "linear";
+            //         circle.checked = g.type === "radial";
+            //     }
+            // }
+
+            kakudo.value = s.rotation;
+            getkakudo.innerText = s.rotation + "°";
+        }
+
+        //画像
+        if (el.classList.contains("image")) {
+            gazousize.value = s.scale;
+            setscalesize(s.scale);
+
+            x.value = s.x ?? 0;
+            y.value = s.y ?? 0;
+
+            changex.value = s.x ?? 0;
+            changey.value = s.y ?? 0;;
+
+            kasanari.value = s.zIndex;
+            kasanaridata.innerText = s.zIndex;
+            changekasanari.value = s.zIndex;
+        }
+
+        //アニメーション
+        const a = el._settings.animation;
+        if (!a) return;
+
+        animType.value = a.type;
+        animDuration.value = a.duration;
+        animDelay.value = a.delay;
+        animLoop.checked = a.loop;
+
+        changeduration.value = a.duration;
+        changedelay.value = a.delay;
+        
+        getduration.innerText = a.duration + "秒";
+        getdelay.innerText = a.delay + "秒";
+
+        updateFontSizeColor();
+        updateSpacingColor();
+        updateHutiColor();
+
+        refreshAllSliders();
+    }
+
+
+    let selectedElement = null;
+
+    function selectElement(el) {
+        //既存の選択を解除
+        document.querySelectorAll(".selected").forEach(e => {
+            e.classList.remove("selected");
+        });
+
+        //新しい選択
+        el.classList.add("selected");
+        selectedElement = el;
+
+        updateUIState();
+        syncUIFromSettings(el);
+
+        //角度
+        kakudo.value = selectedElement._settings.rotation;
+        getkakudo.innerText =
+            selectedElement._settings.rotation + "°";
+    }
+
+    const deleteBtn = document.getElementById("delete");
+
+    function updateUIState() {
+        const hasSelection = selectedElement !== null;
+        const isText  = hasSelection && selectedElement.classList.contains("text");
+        const isImage = hasSelection && selectedElement.classList.contains("image");
+
+        deleteBtn.disabled = !hasSelection;
+
+        //画像
+        gazousize.disabled = !isImage;
+
+        //文字
+        fontfamily.disabled = !isText;
+        fontweight.disabled = !isText;
+    }
+
+
+    deleteBtn.addEventListener("click", () => {
+        if (!selectedElement) return;
+
+        selectedElement.remove();
+        selectedElement = null;
+        updateUIState();
+        updateOutWarning(selectedElement);//警告チェック
+    });
+
+
+    //サイズ
+    const canvasWidth = document.getElementById("canvasWidth");
+    const canvasHeight = document.getElementById("canvasHeight");
+    const applyCanvasSize = document.getElementById("applysize");
+    const size = document.getElementById("size");
+
+    const x = document.getElementById("x");
+    const y = document.getElementById("y");
+
+    applyCanvasSize.addEventListener("click", () => {
+        const w = canvasWidth.value;
+        const h = canvasHeight.value;
+
+        main.style.width = w + "px";
+        main.style.height = h + "px";
+        updateOutWarning(selectedElement);//警告チェック
+        window.addEventListener("resize", updateSliderRange);
+    });
+
+    function resetXYSlider() {
+        x.value = 0;
+        y.value = 0;
+        xspan.innerText = x.value + "px";
+        yspan.innerText = y.value + "px";
+    }
+
+    function centerElement(el) {
+        el._settings.left =
+            (main.clientWidth - el.offsetWidth) / 2 + "px";
+        el._settings.top =
+            (main.clientHeight - el.offsetHeight) / 2 + "px";
+
+        applyImageSettings(el);
+        syncSliderFromElement(el);
+        updateOutWarning(selectedElement);//警告チェック
+        window.addEventListener("resize", updateSliderRange);
+    }
+
+
+    size.addEventListener("change", () => {
+        const canvasSize = Number(size.value);
+
+        //キャンバスサイズ変更
+        main.style.width  = canvasSize + "px";
+        main.style.height = canvasSize + "px";
+
+        updateOutWarning(selectedElement);//警告チェック
+
+        //x / y を初期値に戻す
+        resetXYSlider();
+        window.addEventListener("resize", updateSliderRange);
+
+        //要素を中央に戻す
+        main.querySelectorAll(".text-wrapper, .image").forEach(centerElement);
+    });
+
+
+    //要素がキャンバス外にあったら警告
+    function getElementCenter(el) {
+        const rect = el.getBoundingClientRect();
+
+        return {
+            x: rect.left + rect.width / 2,
+            y: rect.top  + rect.height / 2
+        };
+    }
+
+    function clamp(val, min, max) {
+        return Math.max(min, Math.min(val, max));
+    }
+
+    function checkOutOfCanvas(el) {
+        const canvasRect = main.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+
+        return {
+            left:   elRect.right < canvasRect.left,
+            right:  elRect.left  > canvasRect.right,
+            top:    elRect.bottom < canvasRect.top,
+            bottom: elRect.top    > canvasRect.bottom,
+        };
+    }
+
+    const warning = document.getElementById("outWarning");
+
+    function showWarning(direction) {
+        warning.style.display = "block";
+
+        switch (direction) {
+            case "left":
+                warning.style.left = "0";
+                warning.style.top = "50%";
+                warning.style.transform = "translate(-50%, -50%)";
+                break;
+
+            case "right":
+                warning.style.left = "100%";
+                warning.style.top = "50%";
+                warning.style.transform = "translate(-50%, -50%)";
+                break;
+
+            case "top":
+                warning.style.left = "50%";
+                warning.style.top = "0";
+                warning.style.transform = "translate(-50%, -50%)";
+                break;
+
+            case "bottom":
+                warning.style.left = "50%";
+                warning.style.top = "100%";
+                warning.style.transform = "translate(-50%, -50%)";
+                break;
+        }
+    }
+
+    function updateOutWarning(el) {
+        if (!el) {
+            warning.style.display = "none";
+            return;
+        }
+
+        const canvasRect = main.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+
+        //要素が一部でも見えていたら警告なし
+        const isVisible =
+            elRect.right  > canvasRect.left &&
+            elRect.left   < canvasRect.right &&
+            elRect.bottom > canvasRect.top &&
+            elRect.top    < canvasRect.bottom;
+
+        if (isVisible){
+            warning.style.display = "none";
+            return;
+        }
+
+        //要素の中心（画面座標）
+        const centerX = elRect.left + elRect.width / 2;
+        const centerY = elRect.top  + elRect.height / 2;
+
+        //main座標系へ変換
+        let x = centerX - canvasRect.left;
+        let y = centerY - canvasRect.top;
+
+        //警告の半径分だけ内側に寄せる
+        const margin = 14;
+
+        x = clamp(x, margin, canvasRect.width  - margin);
+        y = clamp(y, margin, canvasRect.height - margin);
+
+        warning.style.display = "block";
+        warning.style.left = x + "px";
+        warning.style.top  = y + "px";
+    }
+
+    warning.addEventListener("click", () => {
+        centerElement(selectedElement);
+
+        //スライダーも初期化
+        resetXYSlider();
+
+        outWarning.style.display = "none";
+    });
+
+
+    const mojihenkou = document.getElementById('mojihenkou');
+    const henkoukakutei = document.getElementById('henkoukakutei');
+    henkoukakutei.addEventListener('click', () => {
+        if (!selectedElement) return;
+
+        const mojidata = document.getElementById("mojihenkou").value;
+
+        if (selectedElement._shadowLayer && selectedElement._fillLayer) {
+            selectedElement._shadowLayer.textContent = mojidata;
+            selectedElement._fillLayer.textContent   = mojidata;
+        }
+
+        applyTextSettings(selectedElement);
+    });
+
+    kakutei.addEventListener("click", () => {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("text-wrapper", "text");
+
+        const shadowLayer = document.createElement("span");
+        shadowLayer.classList.add("shadow-layer");
+
+        const fillLayer = document.createElement("span");
+        fillLayer.classList.add("fill-layer");
+
+        const strokeLayer = document.createElement("span");
+        strokeLayer.classList.add("stroke-layer");
+
+        shadowLayer.textContent = moji.value;
+        fillLayer.textContent   = moji.value;
+        strokeLayer.textContent   = moji.value;
+
+        wrapper.appendChild(shadowLayer);
+        wrapper.appendChild(fillLayer);
+        wrapper.appendChild(strokeLayer);
+
+        wrapper._shadowLayer = shadowLayer;
+        wrapper._fillLayer   = fillLayer;
+        wrapper._strokeLayer   = strokeLayer;
+
+        wrapper._settings = structuredClone(defaultTextSettings);
+        wrapper._settings.animation = structuredClone(defaultAnimationSettings);
+
+        applyTextSettings(wrapper);
+
+        main.appendChild(wrapper);
+
+        //クリックで選択
+        wrapper.addEventListener("mousedown", (e) => {
+            e.stopPropagation();
+            selectElement(wrapper);
+            startDrag(e, wrapper);
+        });
+
+        centerElement(wrapper);
+        selectElement(wrapper);
+
+        // applyTextSettings(span);
+        updateOutWarning(selectedElement);//警告チェック
+    });
+
+    //縦書き
+    const verticalToggle = document.getElementById("verticalToggle");
+    verticalToggle.addEventListener("change", () => {
+        if (!selectedElement) return;
+
+        selectedElement._settings.writingMode =
+            verticalToggle.checked ? "vertical" : "horizontal";
+
+        applyTextSettings(selectedElement);
+    });
+
+
+    //つまみの位置にツールチップを出す
+    function setupSliderTooltip(rangeEl, tooltipEl, unit = "") {
+        function updatePosition() {
+            const min = rangeEl.min ? Number(rangeEl.min) : 0;
+            const max = rangeEl.max ? Number(rangeEl.max) : 100;
+            const val = Number(rangeEl.value);
+
+            const percent = (val - min) / (max - min);
+
+            const sliderWidth = rangeEl.offsetWidth;
+            const thumbWidth = 24; // 必要なら調整
+            const thumbOffset =
+                percent * (sliderWidth - thumbWidth) + thumbWidth / 2;
+
+            tooltipEl.style.left = thumbOffset + "px";
+            tooltipEl.innerText = val + unit;
+        }
+
+        rangeEl.addEventListener("input", updatePosition);
+        window.addEventListener("load", updatePosition);
+    }
+
+    const activeColor = "#1fc3ff";
+    const inactiveColor = "#ffffff";
+
+    //つまみ前後に色をつける
+    function colorRange(rangeEl) {
+        function colorratio() {
+            // const ratio = (rangeEl.value - rangeEl.min) / (rangeEl.max - rangeEl.min) * 100;
+            // rangeEl.style.background = `linear-gradient(90deg, ${activeColor} ${ratio}%, ${inactiveColor} ${ratio}%)`;  
+            
+            const min = rangeEl.min !== "" ? Number(rangeEl.min) : 0;
+            const max = rangeEl.max !== "" ? Number(rangeEl.max) : 100;
+            const value = Number(rangeEl.value);
+
+            const range = max - min;
+
+            if (range === 0) return; // 0除算防止
+
+            const ratio = ((value - min) / range) * 100;
+
+            rangeEl.style.background =
+                `linear-gradient(90deg,
+                    ${activeColor} ${ratio}%,
+                    ${inactiveColor} ${ratio}%)`; 
+        }
+
+        rangeEl.addEventListener("input",colorratio);
+        window.addEventListener("load", colorratio);
+
+        return colorratio;
+    }
+
+    //ツールチップ・前後の色を反映
+    function refreshAllSliders() {
+        fontsize.dispatchEvent(new Event("input"));
+        spacing.dispatchEvent(new Event("input"));
+        huti.dispatchEvent(new Event("input"));
+        shadowX.dispatchEvent(new Event("input"));
+        shadowY.dispatchEvent(new Event("input"));
+        shadowBlur.dispatchEvent(new Event("input"));
+    }
+
+    //スライダーとnumberを両方使えるようにする  
+    function syncRangeAndNumber(range, number, callback) {
+
+        // スライダー操作
+        range.addEventListener("input", (e) => {
+            number.value = range.value;
+            callback(e); // eventを渡す
+        });
+
+        // number操作
+        number.addEventListener("input", (e) => {
+            range.value = e.target.value;
+
+            range.dispatchEvent(new Event("input"));//ツールチップ・前後の色を反映
+
+            // range用の疑似eventを作る
+            const fakeEvent = {
+                target: range
+            };
+
+            callback(fakeEvent);
+        });
+    }
+
+
+    const fontcolor = document.getElementById("fontcolor");
+
+    fontcolor.addEventListener("input", (e) => {
+        if (!selectedElement) return;
+
+        selectedElement._settings.color = e.target.value;
+        applyTextSettings(selectedElement);
+    });
+
+    const fontsize = document.getElementById("fontsize");
+    const getsize = document.getElementById("getsize");
+    const changesize = document.getElementById("changesize");
+
+    //現在の値をspanに埋め込む
+    const setCurrentValue = (val) => {
+        getsize.innerText = val + "px";
+        changesize.value = val;
+    }
+    
+    //inputイベント時に値をセット
+    const rangeOnChange = (e) => {
+        if (!selectedElement) return;
+        const val = e.target.value;
+
+        selectedElement._settings.fontSize = val;
+
+        setCurrentValue(e.target.value);
+        applyTextSettings(selectedElement);
+    }
+
+    fontsize.addEventListener('input', rangeOnChange); //スライダー変化時にイベントを発火
+    syncRangeAndNumber(fontsize, changesize, rangeOnChange);//スライダーとnumberを両方使えるようにする
+    setupSliderTooltip(fontsize, getsize, "px");//つまみの位置にツールチップを出す
+    colorRange(fontsize);//つまみ前後に色をつける
+
+    const huti = document.getElementById("huti");
+    const gethutisize = document.getElementById("gethutisize");
+    const huticolor = document.getElementById("huticolor");
+    const changehuti = document.getElementById("changehuti");
+
+    const setStrokeValue = (val) => {
+        gethutisize.innerText = val + "px";
+        changehuti.value = val;
+    }
+
+    //縁取りを反映
+    const setStrokeWidth = (e) => {
+        if (!selectedElement) return;
+        const val = Number(e.target.value);
+
+        selectedElement._settings.strokeWidth = val;
+
+        setStrokeValue(val);
+        applyTextSettings(selectedElement);
+    };
+
+    const setStrokeColor = (e) => {
+        if (!selectedElement) return;
+
+        selectedElement._settings.strokeColor = e.target.value;
+
+        applyTextSettings(selectedElement);
+    };
+
+    setupSliderTooltip(huti, gethutisize, "px");//つまみの位置にツールチップを出す
+    colorRange(huti);//つまみ前後に色をつける
+
+    //太さ変更
+    huti.addEventListener("input", setStrokeWidth);
+    syncRangeAndNumber(huti, changehuti, setStrokeWidth);//スライダーとnumberを両方使えるようにする
+    //色変更
+    huticolor.addEventListener("input", setStrokeColor);
+
+    const spacing = document.getElementById("spacing");
+    const getspacing = document.getElementById("getspacing");
+    const changespacing = document.getElementById("changespacing");
+    //現在の値をspanに埋め込む
+    const setspace = (val) => {
+        getspacing.innerText = val+"px";
+        changespacing.value = val;
+    }
+    
+    //inputイベント時に値をセット
+    const Changespacing = (e) => {
+        if (!selectedElement) return;
+        const val = e.target.value;
+
+        selectedElement._settings.letterSpacing = Number(val);
+
+        setspace(val);
+        applyTextSettings(selectedElement);
+    }
+
+    spacing.addEventListener('input', Changespacing); //スライダー変化時にイベントを発火
+    changespacing.addEventListener('input', Changespacing);
+    setupSliderTooltip(spacing, getspacing, "px");//つまみの位置にツールチップを出す
+    colorRange(spacing);//つまみ前後に色をつける
+    syncRangeAndNumber(spacing, changespacing, Changespacing);//スライダーとnumberを両方使えるようにする
+
+    const fontfamily = document.getElementById("fontfamily");
+    const fontweight = document.getElementById("fontweight");
+
+    //設定を変更したら選択した文字に適用するようにする
+    fontfamily.addEventListener("change", () => {
+        if (!selectedElement) return;
+        selectedElement._settings.fontFamily = fontfamily.value;
+        applyTextSettings(selectedElement);
+    });
+
+    fontweight.addEventListener("change", () => {
+        if (!selectedElement) return;
+        selectedElement._settings.fontWeight = fontweight.value;
+        applyTextSettings(selectedElement);
+    });
+
+    fontcolor.addEventListener("input", () => {
+        if (!selectedElement) return;
+        selectedElement._settings.color = fontcolor.value;
+        applyTextSettings(selectedElement);
+    });
+
+    //フォント
+    fontfamily.addEventListener("change", async () => {
+        selectedElement._settings.fontFamily = fontfamily.value;
+        applyTextSettings(selectedElement);
+        await document.fonts.ready;//フォントの読み込みを待つ
+    });
+
+    //太さ
+    fontweight.addEventListener("change", () => {
+        selectedElement._settings.fontWeight = fontweight.value;
+        applyTextSettings(selectedElement);
+    });
+
+    //つまみ前後の色を変える
+    const updateFontSizeColor = colorRange(fontsize);
+    const updateSpacingColor = colorRange(spacing);
+    const updateHutiColor = colorRange(huti);
+
+    //影
+    const shadowX = document.getElementById("shadowX");
+    const shadowY = document.getElementById("shadowY");
+    const shadowBlur = document.getElementById("shadowBlur");
+    const shadowColor = document.getElementById("shadowColor");
+
+    const getkagex = document.getElementById("getkagex");
+    const getkagey = document.getElementById("getkagey");
+    const getkageblur = document.getElementById("getkageblur");
+
+    const changekagex = document.getElementById("changekagex");
+    const changekagey = document.getElementById("changekagey");
+    const changekageblur = document.getElementById("changekageblur");
+
+    const setTextShadowValue = () => {
+        getkagex.innerText = shadowX.value + "px";
+        getkagey.innerText = shadowY.value + "px";
+        getkageblur.innerText = shadowBlur.value + "px";
+
+        changekagex.value = shadowX.value;
+        changekagey.value = shadowY.value;
+        changekageblur.value = shadowBlur.value;
+    }
+
+    const TextShadow = (e) => {
+        if (!selectedElement) return;
+
+        selectedElement._settings.textShadow = {
+            offsetX: Number(shadowX.value),
+            offsetY: Number(shadowY.value),
+            blur: Number(shadowBlur.value),
+            color: shadowColor.value
+        };
+
+        setTextShadowValue();
+        applyTextSettings(selectedElement);
+    }
+
+    syncRangeAndNumber(shadowX, changekagex, TextShadow);//スライダーとnumberを両方使えるようにする
+    syncRangeAndNumber(shadowY, changekagey, TextShadow);//スライダーとnumberを両方使えるようにする
+    syncRangeAndNumber(shadowBlur, changekageblur, TextShadow);//スライダーとnumberを両方使えるようにする
+
+    shadowX.addEventListener("input", TextShadow);
+    shadowY.addEventListener("input", TextShadow);
+    shadowBlur.addEventListener("input", TextShadow);
+    shadowColor.addEventListener("input", TextShadow);
+
+    setupSliderTooltip(shadowX, getkagex, "px");//つまみの位置にツールチップを出す
+    setupSliderTooltip(shadowY, getkagey, "px");//つまみの位置にツールチップを出す
+    setupSliderTooltip(shadowBlur, getkageblur, "px");//つまみの位置にツールチップを出す
+    colorRange(shadowX);//つまみ前後に色をつける
+    colorRange(shadowY);//つまみ前後に色をつける
+    colorRange(shadowBlur);//つまみ前後に色をつける
+
+
+    //グラデーション
+    // const line = document.getElementById("line");
+    // const circle = document.getElementById("circle");
+    // const gradation = document.getElementById("gradation");
+    // const getgkakudo = document.getElementById("getgkakudo");
+    // const gradationcolor = document.getElementById("gradationcolor");
+
+    // const changegradation = document.getElementById("changegradation");
+
+    // [line, circle].forEach(radio => {
+    //     radio.addEventListener("change", () => {
+    //         if (!selectedElement) return;
+
+    //         selectedElement._settings.gradient.enabled = true;
+    //         selectedElement._settings.gradient.type =
+    //             line.checked ? "linear" : "radial";
+
+    //         applyTextSettings(selectedElement);
+    //     });
+    // });
+
+    // const setgradation = (val) => {
+    //     getgkakudo.innerText = val + "°";
+    //     changegradation.value = val;
+    // }
+
+    // const gradationChange = (e) => {
+    //     if (!selectedElement) return;
+    //     const val = e.target.value;
+
+    //     selectedElement._settings.gradient.enabled = true;
+    //     selectedElement._settings.gradient.angle = Number(val);
+
+    //     setgradation(val);
+    //     applyTextSettings(selectedElement);
+    // }
+
+    // gradationcolor.addEventListener("input", () => {
+    //     if (!selectedElement) return;
+
+    //     selectedElement._settings.gradient.enabled = true;
+    //     selectedElement._settings.gradient.color = gradationcolor.value;
+
+    //     applyTextSettings(selectedElement);
+    // });
+
+    // setupSliderTooltip(gradation, getgkakudo, "°");//つまみの位置にツールチップを出す
+    // colorRange(gradation);//つまみ前後に色をつける
+    // syncRangeAndNumber(gradation, changegradation, gradationChange);
+
+    //表示/非表示
+    const hutidorihyouji = document.getElementById("hutidorihyouji");
+    // const guradehyouji = document.getElementById("guradehyouji");
+    const kagehyouji = document.getElementById("kagehyouji");
+
+
+    //スライダーを動かせないようにする
+    huti.disabled = true;
+    huticolor.disabled = true;
+    changehuti.disabled = true;
+
+    shadowX.disabled = true;
+    shadowY.disabled = true;
+    shadowBlur.disabled = true;
+    shadowColor.disabled = true;
+
+    getkagex.disabled = true;
+    getkagey.disabled = true;
+    getkageblur.disabled = true;
+
+    changekagex.disabled = true;
+    changekagey.disabled = true;
+    changekageblur.disabled = true;
+
+    const display = () => {
+        if (!selectedElement) return;
+
+        huti.disabled = !hutidorihyouji.checked;
+        huticolor.disabled = !hutidorihyouji.checked;
+        changehuti.disabled = !hutidorihyouji.checked;
+
+        shadowX.disabled = !kagehyouji.checked;
+        shadowY.disabled = !kagehyouji.checked;
+        shadowBlur.disabled = !kagehyouji.checked;
+        shadowColor.disabled = !kagehyouji.checked;
+
+        getkagex.disabled = !kagehyouji.checked;
+        getkagey.disabled = !kagehyouji.checked;
+        getkageblur.disabled = !kagehyouji.checked;
+
+        changekagex.disabled = !kagehyouji.checked;
+        changekagey.disabled = !kagehyouji.checked;
+        changekageblur.disabled = !kagehyouji.checked;
+
+        selectedElement._settings.strokeEnabled = hutidorihyouji.checked;
+        selectedElement._settings.textShadowEnabled = kagehyouji.checked;
+
+        applyTextSettings(selectedElement);
+    }
+
+    hutidorihyouji.addEventListener("input", display);
+    kagehyouji.addEventListener("input", display);
+
+
+    //角度
+    const kakudo = document.getElementById("kakudo");
+    const getkakudo = document.getElementById("getkakudo");
+    const changekakudo = document.getElementById("changekakudo");
+
+    const setRotationValue = (val) => {
+        getkakudo.innerText = val + "°";
+        changekakudo.value = val;
+    }
+    
+    //inputイベント時に値をセット
+    const Changekakudo = (e) => {
+        if (!selectedElement) return;
+        const val = e.target.value;
+
+        selectedElement._settings.rotation = val;
+
+        setRotationValue(val);
+
+        applyTextSettings(selectedElement);
+        applyImageSettings(selectedElement);
+    }
+
+    kakudo.addEventListener('input', Changekakudo); //スライダー変化時にイベントを発火
+    syncRangeAndNumber(kakudo, changekakudo, Changekakudo);//スライダーとnumberを両方使えるようにする
+    setupSliderTooltip(kakudo, getkakudo, "°");//つまみの位置にツールチップを出す
+    colorRange(kakudo);//つまみ前後に色をつける
+
+
+    const kasanari = document.getElementById("kasanari");
+    const kasanaridata = document.getElementById("kasanaridata");
+    const changekasanari = document.getElementById("changekasanari");
+
+    const setZindexValue = (val) => {
+        kasanaridata.innerText = val;
+        changekasanari.value = val;
+    }
+
+    //重なり
+    const zindex = (e) => {
+        if (!selectedElement) return;
+        const kasa = e.target.value;
+        
+        selectedElement._settings.zIndex = kasa;
+
+        setZindexValue(kasa);
+
+        applyTextSettings(selectedElement);
+        applyImageSettings(selectedElement);
+    };
+
+    kasanari.addEventListener('input', zindex);
+    syncRangeAndNumber(kasanari, changekasanari, zindex);//スライダーとnumberを両方使えるようにする
+    setupSliderTooltip(kasanari, kasanaridata);//つまみの位置にツールチップを出す
+    colorRange(kasanari);//つまみ前後に色をつける
+
+
+    //移動スナップ
+    let snapState = {
+        x: null, //スナップ中の target 値
+        y: null
+    };
+
+    let snapEnabled = true;
+
+    const snap = document.getElementById("snap");
+    snap.addEventListener("change", () => {
+        snapEnabled = snap.checked;
+    });
+
+    const SNAP_DISTANCE = 10;
+
+    function snapPosition(value, targets, axis) {
+        const LOCK_DISTANCE = 15;
+
+        //すでにスナップ中ならロックを維持
+        if (snapState[axis] !== null) {
+            if (Math.abs(value - snapState[axis]) > LOCK_DISTANCE) {
+                snapState[axis] = null; //ロック解除
+            } else {
+                return { value: snapState[axis], snapped: true };
+            }
+        }
+
+        //新規スナップ判定
+        for (const t of targets) {
+            if (Math.abs(value - t) <= SNAP_DISTANCE) {
+                snapState[axis] = t;
+                return { value: t, snapped: true };
+            }
+        }
+
+        return { value, snapped: false };
+    }
+
+    function snapX(el, left) {
+        const canvasWidth = main.clientWidth;
+        const elWidth = el.offsetWidth;
+
+        const targets = [
+            0,
+            (canvasWidth - elWidth) / 2,
+            canvasWidth - elWidth
+        ];
+
+        return snapPosition(left, targets, "x");
+    }
+    function snapY(el, top) {
+        const canvasHeight = main.clientHeight;
+        const elHeight = el.offsetHeight;
+
+        const targets = [
+            0,
+            (canvasHeight - elHeight) / 2,
+            canvasHeight - elHeight
+        ];
+
+        return snapPosition(top, targets, "y");
+    }
+
+    //文字移動
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    const startDrag = (e, el) => {
+        if (!editMode) return;
+
+        console.log("ドラッグ開始")
+        isDragging = true;
+
+        const canvasRect = main.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+
+        const scale = getScale(el);
+
+        offsetX = (e.clientX - elRect.left) / scale;
+        offsetY = (e.clientY - elRect.top)  / scale;
+
+        document.onmousemove = (e) => {
+            if (!isDragging) return;
+
+            const scale = getScale(el);
+
+            let left =
+                e.clientX - canvasRect.left - offsetX * scale;
+            let top  =
+                e.clientY - canvasRect.top  - offsetY * scale;
+
+
+            if (snapEnabled) {
+                const sx = snapX(el, left);
+                const sy = snapY(el, top);
+
+                if (sx.snapped) left = sx.value;
+                if (sy.snapped) top  = sy.value;
+
+                el.classList.toggle(
+                    "snap-active",
+                    sx.snapped || sy.snapped
+                );
+            }
+
+            el._settings.left = left + "px";
+            el._settings.top  = top  + "px";
+
+            applyImageSettings(el);
+            syncSliderFromElement(el);
+            updateOutWarning(el);
+        };
+
+        document.onmouseup = () => {
+            isDragging = false;
+            snapState.x = null;
+            snapState.y = null;
+            el.classList.remove("snap-active");
+            document.onmousemove = null;
+            document.onmouseup = null;
+        };
+    };
+
+
+    const imgfile = document.getElementById("imgfile");
+    const addImageBtn = document.getElementById("addImage");
+
+    addImageBtn.addEventListener("click", () => {
+        const file = imgfile.files[0];
+        if (!file) return;
+
+        const img = document.createElement("img");
+        img.classList.add("selectable", "image");
+
+        img.src = URL.createObjectURL(file);
+
+        img.draggable = false;
+
+        img.addEventListener("dragstart", e => {
+            e.preventDefault();
+        });
+
+        img.onload = () => {
+            img._settings = { 
+                ...defaultImageSettings,
+                animation: { ...defaultAnimationSettings }
+             };
+            applyImageSettings(img);
+
+            main.appendChild(img);
+
+            centerElement(img);//中央配置
+
+            selectElement(img);
+            //スライダー同期
+            resetXYSlider();
+
+            updateOutWarning(selectedElement);//警告チェック
+        };
+
+        img.addEventListener("mousedown", (e) => {
+            selectElement(img);
+            startDrag(e, img);
+        });
+    });
+
+    const gazousize = document.getElementById("gazousize");
+    const scalesize = document.getElementById("scalesize");
+    const changescale = document.getElementById("changescale");
+
+    //スライダーで拡大縮小
+    //現在の値をspanに埋め込む関数
+    const setscalesize = (val) => {
+        scalesize.innerText = Math.round(val * 100) + "%";
+        changescale.value = val;
+    }
+    
+    //inputイベント時に値をセット
+    const setimgsize = (e) => {
+        if (!selectedElement) return;
+        const val = e.target.value;
+
+        selectedElement._settings.scale = Number(e.target.value);
+        
+        setscalesize(e.target.value);
+
+        applyImageSettings(selectedElement);
+        updateOutWarning(selectedElement);
+    }
+
+    gazousize.addEventListener('input', setimgsize);
+    syncRangeAndNumber(gazousize, changescale, setimgsize);//スライダーとnumberを両方使えるようにする
+    setupSliderTooltip(gazousize, scalesize, "%");//つまみの位置にツールチップを出す
+    colorRange(gazousize);//つまみ前後に色をつける
+
+    const xspan = document.getElementById("xspan");
+    const yspan = document.getElementById("yspan");
+    const changex = document.getElementById("changex");
+    const changey = document.getElementById("changey");
+
+    //画像移動
+    function getScale(el) {
+        return el._settings?.scale ?? 1;
+        const match = el.style.transform.match(/scale\(([^)]+)\)/);
+        return match ? Number(match[1]) : 1;
+        updateOutWarning(selectedElement);//警告チェック
+    }
+
+    //スライダーをキャンバスと合わせる
+    function updateSliderRange() {
+        const rect = main.getBoundingClientRect();
+
+        //X
+        x.min = -Math.round(rect.width);
+        x.max = Math.round(rect.width);
+
+        //Y
+        y.min = -Math.round(rect.height);
+        y.max = Math.round(rect.height);
+    }
+
+    function syncSliderFromElement(el) {
+        const scale = getScale(el);
+        const w = el.offsetWidth * scale;
+        const h = el.offsetHeight * scale;
+
+        const centerLeft =
+            main.clientWidth / 2 - w / 2;
+        const centerTop =
+            main.clientHeight / 2 - h / 2;
+
+        x.value = Math.round(parseFloat(el._settings.left));
+        y.value = Math.round(parseFloat(el._settings.top));
+
+        xspan.innerText = x.value + "px";
+        yspan.innerText = y.value + "px";
+        changex.value = x.value;
+        changey.value = y.value;
+    }
+
+    const xrange = (e) => {
+        if (!selectedElement) return;
+        const val = e.target.value;
+        // let left = Number(x.value);
+        let left = val;
+
+        if (snapEnabled) {
+            let result = snapX(selectedElement, Number(x.value));
+            left = result.value;
+            selectedElement._settings.left = result.value + "px";
+
+            selectedElement.classList.toggle(
+                "snap-active",
+                result.snapped
+            );
+        }
+
+        selectedElement._settings.left = left + "px";
+        xspan.innerText = val + "px";
+        changex.value = val;
+        applyImageSettings(selectedElement);
+    }
+
+    const yrange = (e) => {
+        if (!selectedElement) return;
+        const val = e.target.value;
+        // let top = Number(y.value);
+        let top = val;
+
+        if (snapEnabled) {
+            let result = snapY(selectedElement, Number(y.value));
+            top = result.value;
+            selectedElement._settings.top = result.value + "px";
+
+            selectedElement.classList.toggle(
+                "snap-active",
+                result.snapped
+            );
+        }
+
+        selectedElement._settings.top = top + "px";
+        yspan.innerText = val + "px";
+        changey.value = val;
+        applyImageSettings(selectedElement);
+    }
+
+    x.addEventListener('input', xrange);
+    y.addEventListener('input', yrange);
+    syncRangeAndNumber(x, changex, xrange);//スライダーとnumberを両方使えるようにする
+    syncRangeAndNumber(y, changey, yrange);//スライダーとnumberを両方使えるようにする
+    setupSliderTooltip(x, xspan, "px");//つまみの位置にツールチップを出す
+    setupSliderTooltip(y, yspan, "px");//つまみの位置にツールチップを出す
+    colorRange(x);//つまみ前後に色をつける
+    colorRange(y);//つまみ前後に色をつける
+
+    const animType = document.getElementById("animType");
+    const animDuration = document.getElementById("animDuration");
+    const animDelay = document.getElementById("animDelay");
+    const animLoop = document.getElementById("animLoop");
+    const getduration = document.getElementById("getduration");
+    const getdelay = document.getElementById("getdelay");
+
+    const changeduration = document.getElementById("changeduration");
+    const changedelay = document.getElementById("changedelay");
+
+    //アニメーション
+    animType.addEventListener("change", () => {
+        if (!selectedElement) return;
+        if (!selectedElement._settings.animation) return;
+
+        selectedElement._settings.animation.type = animType.value;
+        applyAnimation(selectedElement);
+    });
+
+    const setduration = (val) => {
+        getduration.innerText = val;
+        changeduration.value = val;
+    }
+
+    const durationChange = (e) => {
+        if (!selectedElement) return;
+        const val = e.target.value;
+
+        selectedElement._settings.animation.duration =
+            Number(animDuration.value);
+        
+        setduration(val);
+        applyAnimation(selectedElement); 
+    }
+
+    const setdelay = (val) => {
+        getdelay.innerText = val;
+        changedelay.value = val;
+    }
+
+    const delayChange = (e) => {
+        if (!selectedElement) return;
+        const val = e.target.value;
+
+        selectedElement._settings.animation.delay =
+            Number(animDelay.value);
+
+        setdelay(val);
+        applyAnimation(selectedElement);
+    }
+
+    animLoop.addEventListener("change", () => {
+        if (!selectedElement) return;
+        selectedElement._settings.animation.loop = animLoop.checked;
+
+        applyAnimation(selectedElement);
+    });
+
+    syncRangeAndNumber(animDuration, changeduration, durationChange);
+    syncRangeAndNumber(animDelay, changedelay, delayChange);
+
+    setupSliderTooltip(animDuration, getduration, "秒");//つまみの位置にツールチップを出す
+    setupSliderTooltip(animDelay, getdelay, "秒");//つまみの位置にツールチップを出す
+
+    colorRange(animDuration);//つまみ前後に色をつける
+    colorRange(animDelay);//つまみ前後に色をつける
+
+    //ダウンロードするときにアニメーションを止める
+    function pauseAnimation() {
+        document.querySelectorAll(".text-wrapper, .image").forEach(el => {
+            if (!el._settings?.animation) return;
+
+            //animation文字列を保存
+            el._savedAnimation = el.style.animation;
+
+            //完全停止
+            el.style.animation = "none";
+        });
+    }
+
+    //再生させる
+    function resumeAnimation() {
+        document.querySelectorAll(".text-wrapper, .image").forEach(el => {
+            if (!el._settings?.animation) return;
+
+            //再生リセット
+            el.style.animation = "none";
+            void el.offsetWidth;
+
+            applyAnimation(el);
+        });
+    }
+
+    //GIFでダウンロードするときに再生させる
+    function freezeForGif() {
+        document.querySelectorAll(".text-wrapper, .image").forEach(el => {
+            el._gifBackup = {
+                animation: el.style.animation,
+                transform: el.style.transform
+            };
+            el.style.animation = "none";
+        });
+    }
+
+    function restoreAfterGif() {
+        document.querySelectorAll(".text-wrapper, .image").forEach(el => {
+            if (!el._gifBackup) return;
+            el.style.animation = el._gifBackup.animation;
+            el.style.transform = el._gifBackup.transform;
+            delete el._gifBackup;
+        });
+    }
+
+    //Gifダウンロードのときにキャンバスを操作できなくする
+    function lockCanvas() {
+        document.getElementById("canvasLock").hidden = false;
+    }
+
+    function unlockCanvas() {
+        document.getElementById("canvasLock").hidden = true;
+    }
+
+    //設定を動かせないようにする
+    function lockInputs(lock) {
+        document.querySelectorAll('input[type="range"], input[type="number"], input[type="color"]')
+        .forEach(el => el.disabled = lock);
+    }
+
+    function removeTransforms() {
+        document.querySelectorAll(".text-wrapper, .image").forEach(el => {
+            el._savedTransform = el.style.transform;
+            el.style.transform = "none";
+        });
+    }
+
+    function restoreTransforms() {
+        document.querySelectorAll(".text-wrapper, .image").forEach(el => {
+            if (el._savedTransform !== undefined) {
+                el.style.transform = el._savedTransform;
+            }
+        });
+    }
+
+    //背景色
+    const background = document.getElementById("background");
+    background.addEventListener("input", (e) => {
+        main.style.backgroundColor = e.target.value;
+    });
+
+    //ダウンロードボタン
+    const downloadBtn = document.getElementById("download");
+    const downloadgif = document.getElementById("gif");
+    const transparentBg = document.getElementById("transparentBg");
+    const scalehigh = document.getElementById("scalehigh");
+
+    downloadBtn.addEventListener("click", async () => {
+        //フォントの読み込みを待つ
+        await document.fonts.ready;
+
+        //警告UIを消す
+        const warnings = document.querySelectorAll(".outWarning");
+        warnings.forEach(el => el.style.display = "none");
+        main.classList.add("exporting");//選択枠を消す
+
+        //設定を動かせないようにする
+        lockInputs(true);
+
+        //アニメーション停止
+        pauseAnimation();
+
+        removeTransforms();
+
+        const selectedFont = fontfamily.value;
+
+        const originalBorder = main.style.border;
+        const originalBg = main.style.backgroundColor;
+        main.style.border = "none";
+
+        const bgColor = transparentBg.checked ? null : background.value; //白背景なら #fff
+
+        const scale = scalehigh.checked ? 2 : 1;//高解像度
+
+        // 透過ONなら背景を消す
+        if (transparentBg.checked) {
+            main.style.backgroundColor = "transparent";
+        }
+
+        //mainを画像化
+        //DOMをSVGに変換し、PNG生成
+        const dataUrl = await htmlToImage.toPng(main,{//mainの中身を画像化
+            style:{
+                WebkitBackgroundClip:"text",
+                WebkitTextFillColor:"transparent"
+            },
+            backgroundColor: transparentBg.checked ? null : background.value,
+            pixelRatio: scale,
+            cacheBust:true,
+            fontEmbedCSS: true//フォントをSVGに埋め込み
+        });
+
+        const canvas = await html2canvas(main, {
+            backgroundColor: bgColor,
+            scale: scale,
+            useCORS: true,
+        });
+
+        //PNGとしてダウンロード
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = "stamp.png";
+        link.click();
+
+        //警告UIを元に戻す
+        warnings.forEach(el => el.style.display = "");
+        main.style.backgroundColor = originalBg;
+        main.style.border = originalBorder;
+        main.classList.remove("exporting");
+
+        lockInputs(false);
+
+        restoreTransforms();
+
+        //アニメーション再生
+        resumeAnimation();
+    });
+
+    //GIFでダウンロード
+    downloadgif.addEventListener("click", async () => {
+        lockCanvas();
+
+        try {
+            //アニメーションを再生
+            freezeForGif();
+
+            removeTransforms();
+
+            const scale = scalehigh.checked ? 2 : 1;
+
+            const fps = 10;            //GIF の滑らかさ（10 fps）
+            const duration = 2;        //アニメ秒数
+            const totalFrames = fps * duration;
+            const frames = [];
+
+            //警告UIを消す
+            document.querySelectorAll(".outWarning").forEach(el => el.style.display = "none");
+            const originalBorder = main.style.border;
+            main.style.border = "none";
+            main.classList.add("exporting");
+
+            //設定を動かせないようにする
+            lockInputs(true);
+
+            //各フレームを取得
+            for (let i = 0; i < totalFrames; i++) {
+                const progress = i / totalFrames;
+
+                document.querySelectorAll(".text-wrapper, .image").forEach(el => {
+                    if (!el._settings) return;
+
+                    const a = el._settings.animation;
+
+                    if (a && a.type !== "none") {
+                        const ms = progress * a.duration * 1000;
+                        // el.style.animation = "none";
+                        void el.offsetWidth;
+                        el.style.animation = `${a.type} ${a.duration}s linear ${a.delay}s 1`;
+                        el.style.animationDelay = `-${ms}ms`;
+                    }
+                });
+
+                await new Promise(r => requestAnimationFrame(() => r()));//次フレームまで待機
+
+                document.querySelectorAll(".text-wrapper, .image").forEach(el => {
+                    const style = getComputedStyle(el);
+                    el.style.transform = style.transform;
+                });
+
+                const canvas = await html2canvas(main, {
+                    backgroundColor: background.value,
+                    scale: scale,
+                    useCORS: true,
+
+                });
+
+                frames.push(canvas.toDataURL("image/png"));
+            }
+
+            //GIF 生成
+            gifshot.createGIF({
+                images: frames,
+                interval: 1 / fps,
+                gifWidth: main.clientWidth * scale,
+                gifHeight: main.clientHeight * scale
+            }, obj => {
+                if (!obj.error) {
+                    const link = document.createElement("a");
+                    link.href = obj.image;
+                    link.download = "stamp.gif";
+                    link.click();
+                }
+            });
+
+            document.querySelectorAll(".outWarning").forEach(el => el.style.display = "");
+            main.style.border = originalBorder;
+            main.classList.remove("exporting");
+
+            lockInputs(false);
+
+            //後処理
+        } finally {
+            restoreTransforms();
+            restoreAfterGif();
+            unlockCanvas();
+            resumeAnimation();
+        }
+    });
+
+    //初期反映
+    window.addEventListener("DOMContentLoaded", () => {
+        setscalesize(gazousize.value);
+    });
+
+    window.onload = () => {
+        updateSliderRange();
+        refreshAllSliders();
+    }
+</script>
