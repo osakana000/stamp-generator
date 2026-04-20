@@ -1,0 +1,664 @@
+@font-face {
+  font-family: "ZenMaru";
+  src: url(./font/ZenMaruGothic-Regular.woff);
+  font-weight: 400;
+}
+@font-face {
+  font-family: "ZenMaru";
+  src: url(./font/ZenMaruGothic-Medium.woff);
+  font-weight: 500;
+}
+@font-face {
+  font-family: "ZenMaru";
+  src: url(./font/ZenMaruGothic-Bold.woff);
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "ZenKaku";
+  src: url(./font/ZenKakuGothicNew-Regular.woff);
+  font-weight: 400;
+}
+@font-face {
+  font-family: "ZenKaku";
+  src: url(./font/ZenKakuGothicNew-Medium.woff);
+  font-weight: 500;
+}
+@font-face {
+  font-family: "ZenKaku";
+  src: url(./font/ZenKakuGothicNew-Bold.woff);
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "ZenOld";
+  src: url(./font/ZenOldMincho-Regular.woff);
+  font-weight: 400;
+}
+@font-face {
+  font-family: "ZenOld";
+  src: url(./font/ZenOldMincho-Medium.woff);
+  font-weight: 500;
+}
+@font-face {
+  font-family: "ZenOld";
+  src: url(./font/ZenOldMincho-Bold.woff);
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "Kaisei_Opti";
+  src: url(./font/KaiseiOpti-Regular.woff);
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Kaisei_Opti";
+  src: url(./font/KaiseiOpti-Medium.woff);
+  font-weight: 500;
+}
+@font-face {
+  font-family: "Kaisei_Opti";
+  src: url(./font/KaiseiOpti-Bold.woff);
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "Yusei_Magic";
+  src: url(./font/YuseiMagic-Regular.woff);
+}
+
+@font-face {
+  font-family: "Yuji_Mai";
+  src: url(./font/YujiMai-Regular.woff);
+}
+
+@font-face {
+  font-family: "Reggae_One";
+  src: url(./font/ReggaeOne-Regular.woff);
+}
+
+@font-face {
+  font-family: "Potta_One";
+  src: url(./font/PottaOne-Regular.woff);
+}
+
+
+body{
+  font-family: "ZenMaru";
+  font-weight: 500;
+}
+
+button{
+  background-color: #fff;
+  color: #000;
+  border: solid 2px #e3e6ea;
+  border-radius: 4px;
+  font-family: "ZenMaru";
+  font-weight: 400;
+  margin: 0px 2.5px;
+  cursor: pointer;
+  transition: 0.1s;
+}
+button:hover{
+  background-color: #1fc3ff;
+  color: #fff;
+}
+
+input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.mode-btn {
+  border-bottom: solid 5px #e3e6ea;
+}
+.mode-btn:hover{
+  transform: translateY(3px);
+  border-bottom-width: 2px;
+}
+.mode-btn.active {
+  background-color: #1fc3ff;
+  color: #fff;
+  transform: translateY(3px);
+  border-bottom-width: 2px;
+}
+
+#yoko{
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+#tab{
+  flex-wrap: wrap;
+}
+
+/*GIF生成中にさわれないようにする*/
+#canvasWrapper {
+  position: relative;
+}
+
+#canvasLock {
+  background: rgba(255, 255, 255, 0.6);
+  color: red;
+  paint-order: stroke fill #fff;/*縁取りを文字の下にする*/
+  -webkit-text-stroke:stroke fill;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+  position: absolute;
+  display: flex;
+  inset: 0;
+  z-index: 999;
+}
+#canvasLock[hidden] {
+  display: none;
+}
+
+#main{
+  background-color: rgba(255, 255, 255, 0);
+  border: 1px solid #000000;
+  height: 512px;
+  width: 512px;
+  margin: 10px;
+  margin-right: 20px;
+  aspect-ratio: 5 / 5;
+  overflow: hidden;
+  position: relative;
+  /* overflow:visible; */
+}
+
+.window{
+  background-color: #ffffff;
+  border-radius: 5px;
+  border: solid 1px #e3e6ea;
+  margin: 10px;
+  padding: 5px;
+  line-height: 30px;
+  overflow: scroll;
+}
+
+#settei{
+  /* width: 300px; */
+  height: 360px;
+}
+
+.textbtn{
+  height: 50px;
+  width: 50px;
+  font-size: 25px;
+  border-bottom: solid 5px #e3e6ea;
+}
+.textbtn:hover{
+  transform: translateY(3px);
+  border-bottom-width: 2px;
+}
+.textbtn.active {
+  background-color: #1fc3ff;
+  color: #fff;
+  transform: translateY(3px);
+  border-bottom-width: 2px;
+}
+
+.text {
+  paint-order: stroke fill;/*縁取りを文字の下にする*/
+  -webkit-text-stroke:stroke fill;
+  white-space: pre-wrap;
+  line-height: 1.2;
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: grab;
+  user-select: none;/*ドラッグ中に文字選択させない*/
+}
+
+/*縁取り・影*/
+/*2レイヤー構造*/
+.shadow-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.fill-layer{
+  position: relative;
+  display:inline-block;
+  white-space:pre;
+  z-index: 3;
+}
+
+.stroke-layer{
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.text-wrapper{
+  position:absolute;
+  cursor: grab;
+  user-select:none;
+  transform-origin:center center;
+}
+.text-wrapper:active{
+  cursor: grabbing;
+}
+.text-wrapper:hover{
+  outline: 3px solid #949494;
+  outline-offset: 4px;
+}
+
+/*縦書き*/
+.vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  white-space: pre-wrap;
+}
+
+.image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: grab;
+  transform-origin: center center;
+  user-select: none;/*ドラッグ中に文字選択させない*/
+}
+.image:active{
+  cursor: grabbing;
+}
+.image:hover{
+  outline: 3px solid #949494;
+  outline-offset: 4px;
+}
+
+.selectable {
+  position: absolute;
+}
+.selected {
+  outline: 3px dashed red;
+  outline-offset: 4px;
+}
+.snap-active {
+  outline: 3px solid blue;
+  outline-offset: 4px;
+}
+
+/*選択枠を消す*/
+.exporting .selected,
+.exporting .snap-active {
+  outline: none !important;
+}
+
+/*警告マーク*/
+#outWarning {
+  position: absolute;
+  color: red;
+  font-size: 22px;
+  font-weight: bold;
+  display: none;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 9999;
+  transition: 0.1s;
+}
+#outWarning:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+#outWarning .mark {
+  font-weight: bold;
+  color: red;
+  font-size: 20px;
+}
+.warning-line {
+  position: absolute;
+  border: 1px dashed red;
+}
+
+@media (max-width: 900px) {
+  #yoko {
+    flex-direction: column;
+  }
+  #settei{
+    width: 100%;
+    height: 200px;
+    padding: 5px;
+    box-sizing: border-box;
+  }
+  #two{
+    width: 100%;
+    height: 90px;
+    padding: 5px;
+    box-sizing: border-box;
+  }
+}
+
+
+/*テキスト*/
+textarea {
+  padding: 0.5em;
+  border: solid 2px #e3e6ea;
+  border-radius: 4px;
+}
+textarea:focus {
+  border-color: #1fc3ff;
+  outline: 0;
+}
+
+/*スライダー*/
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  height: 10px;
+  width: 60%;
+  background: #1fc3ff;
+  border-radius: 10px;
+  border: solid 3px #e3e6ea;
+}
+/*WebKit向けのつまみ*/
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background: #1fc3ff;
+  width: 24px;
+  height: 30px;
+  border-radius: 5px;
+  box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.15);
+}
+/*Moz向けのつまみ*/
+input[type="range"]::-moz-range-thumb {
+  background: #1fc3ff;
+  width: 24px;
+  height: 30px;
+  border-radius: 5px;
+  box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.15);
+  border: none;
+}
+input[type="range"]::-moz-focus-outer {
+  border: 0;
+}
+input[type="range"]:active::-webkit-slider-thumb {
+  box-shadow: 0px 5px 10px -2px rgba(0, 0, 0, 0.3);
+}
+
+/*数字の入力欄*/
+input[type="number"] {
+  border: solid 2px #e3e6ea;
+  border-radius: 4px;
+  width: 50px;
+  margin: 5px 5px;
+  padding: 0.5em;
+}
+input[type="number"]:focus {
+  border-color: #1fc3ff;
+  outline: 0;
+}
+
+/*タブ*/
+.tab {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+  max-width: 500px;
+}
+.tab > label {
+  flex: 1 1;
+  order: -1;
+  opacity: .5;
+  min-width: 70px;
+  padding: .6em 1em;
+  border-radius: 5px 5px 0 0;
+  background-color: #fff;
+  color: #1fc3ff;
+  border: solid 1px #e3e6ea;
+  font-size: .9em;
+  text-align: center;
+  cursor: pointer;
+}
+.tab > label:hover {
+  opacity: .8;
+}
+.tab > label:has(:checked) {
+  background-color: #55c1f4;
+  border: solid 1px #55c1f4;
+  color: #fff;
+}
+.tab > div {
+  display: none;
+  width: 100%;
+  padding: 1.5em 1em;
+  background-color: #fff;
+}
+.tab label:has(:checked) {
+  opacity: 1;
+}
+.tab label:has(:checked) + div {
+  display: block;
+}
+.none{
+  display: none; /*ラジオボタンを非表示*/
+}
+
+/*アコーディオンメニュー*/
+.accordion {
+  max-width: 500px;
+  margin-bottom: 7px;
+  border-bottom: 2px solid #1fc3ff;
+}
+.accordion summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding: 1em 2em;
+  color: #000000;
+  font-weight: 600;
+  cursor: pointer;
+}
+.accordion summary::-webkit-details-marker {
+  display: none;
+}
+.accordion summary::after {
+  transform: translateY(-25%) rotate(45deg);
+  width: 7px;
+  height: 7px;
+  margin-left: 10px;
+  border-bottom: 3px solid #000000b3;
+  border-right: 3px solid #000000b3;
+  content: '';
+  transition: transform .3s;
+}
+.accordion[open] summary::after {
+  transform: rotate(225deg);
+}
+.accordion p {
+  transform: translateY(-10px);
+  opacity: 0;
+  margin: 0;
+  padding: .3em 2em 1.5em;
+  color: #333333;
+  transition: transform .5s, opacity .5s;
+}
+.accordion[open] p {
+  transform: none;
+  opacity: 1;
+}
+
+/*セレクトボックス*/
+.selectbox {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.selectbox::after {
+  background-color: #535353;
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  right: 15px;
+  height: 7px;
+  width: 10px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.selectbox select {
+  appearance: none;
+  min-width: 130px;
+  height: 25px;
+  border: 2px solid #e3e6ea;
+  border-radius: 3px;
+  background-color: #fff;
+  color: #333333;
+  font-size: 15px;
+  padding: 0px 5px;
+  margin: 0px 3px;
+  text-align: left;
+  cursor: pointer;
+}
+.selectbox select:focus{
+  border-color: #1fc3ff;
+  outline: 0;
+}
+
+/*ツールチップ*/
+.tooltip {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+}
+.tooltip input[type="range"] {
+  width: 60%;
+}
+.tooltip > div {
+  cursor: pointer;
+}
+.tooltip > span {
+  background-color: #1081b5;
+  color: #ffffff;
+  font-size: 14px;
+  border-radius: 25px;
+  position: absolute;
+  top: -40px;
+  left: 0;
+  display: flex;
+  padding: 1.5px 15px;
+  justify-content: center;
+  visibility: hidden;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity .3s;
+  box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.15);
+}
+.tooltip > span::before {
+  position: absolute;
+  bottom: -6px;
+  width: 9px;
+  height: 6px;
+  background-color: inherit;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  content: '';
+}
+.tooltip:hover > span {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+/*アニメーション*/
+/*フェードイン*/
+@keyframes fadeIn {
+  0% {
+    transform:
+    scale(var(--scale))
+    rotate(var(--rotate)); 
+    opacity: 0;
+  }
+  100% {
+    transform:
+    scale(var(--scale))
+    rotate(var(--rotate));
+    opacity: 1;
+  }
+}
+
+/*拡大*/
+@keyframes scaleIn {
+  0% {
+    transform: scale(calc(var(--scale) * 0.5)) rotate(var(--rotate));
+    opacity: 0;
+  }
+  99.9% {
+    transform: scale(var(--scale)) rotate(var(--rotate));
+    opacity: 1;
+  }
+  100% {
+    transform: scale(var(--scale)) rotate(var(--rotate));
+    opacity: 1;
+  }
+}
+
+/*揺れ*/
+@keyframes shake {
+  0% {
+    transform:
+    translateX(0)
+    scale(var(--scale))
+    rotate(var(--rotate));
+  }
+  25% {
+    transform:
+    translateX(-8px)
+    scale(var(--scale))
+    rotate(var(--rotate));
+  }
+  40% {
+    transform:
+    translateX(8px)
+    scale(var(--scale))
+    rotate(var(--rotate));
+  }
+  60%{
+    transform:
+    translateX(-4px)
+    scale(var(--scale))
+    rotate(var(--rotate));
+  }
+  100%{
+    transform:
+    translateX(4px)
+    scale(var(--scale))
+    rotate(var(--rotate));
+  }
+}
+
+/*飛び跳ね*/
+@keyframes jump {
+  0% {
+    transform:
+    translateY(0)
+    scale(var(--scale))
+    rotate(var(--rotate));
+  }
+  25% {
+    transform:
+    translateY(-50px)
+    scale(var(--scale))
+    rotate(var(--rotate));
+  }
+  55% {
+    transform:
+    translateY(0)
+    scale(var(--scale))
+    rotate(var(--rotate));
+  }
+  70% {
+    transform:
+    translateY(-20px)
+    scale(var(--scale))
+    rotate(var(--rotate));
+  }
+  100% {
+    transform:
+    translateY(0)
+    scale(var(--scale))
+    rotate(var(--rotate));
+  }
+}
